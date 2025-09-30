@@ -5,18 +5,33 @@ import numpy as np
 
 
 def fetch_weather_features(date: pd.Timestamp):
-    url = (
+    if date <= pd.Timestamp.now() - pd.Timedelta(days=3):
+        url = (
         f"https://archive-api.open-meteo.com/v1/archive?"
         f"latitude=-33.8678&longitude=151.2073"
         f"&start_date={date.strftime('%Y-%m-%d')}"
         f"&end_date={date.strftime('%Y-%m-%d')}"
         "&daily=temperature_2m_min,temperature_2m_max,"
-        "precipitation_sum,weathercode,daylight_duration,"
+        "weathercode,daylight_duration,"
         "sunshine_duration,et0_fao_evapotranspiration,"
         "precipitation_hours,wind_direction_10m_dominant,"
         "wind_gusts_10m_max"
         "&timezone=Australia%2FSydney"
-    )
+        )
+
+    else:
+        url = (
+            f"https://api.open-meteo.com/v1/forecast?"
+            f"latitude=-33.8678&longitude=151.2073"
+            f"&start_date={date.strftime('%Y-%m-%d')}"
+            f"&end_date={date.strftime('%Y-%m-%d')}"
+            "&daily=temperature_2m_min,temperature_2m_max,"
+            "weathercode,daylight_duration,"
+            "sunshine_duration,et0_fao_evapotranspiration,"
+            "precipitation_hours,wind_direction_10m_dominant,"
+            "wind_gusts_10m_max"
+            "&timezone=Australia%2FSydney"
+        )
     response = requests.get(url, timeout=30)
     if response.status_code != 200:
         raise Exception(f"Weather API request failed: {response.text}")
@@ -24,6 +39,7 @@ def fetch_weather_features(date: pd.Timestamp):
     if "daily" not in data:
         raise ValueError(f"No weather data available for {date.strftime('%Y-%m-%d')}")
     return data["daily"]
+
 
 
 def _encode_cyclic(val, max_val):
