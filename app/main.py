@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import timedelta
 from .utils import fetch_weather_features, engineer_rain_features, engineer_precip_features
 
+# Initialize FastAPI app
 app = FastAPI(title="Meteo Rain & Precipitation Prediction API")
 
 # Load models
@@ -15,7 +16,7 @@ try:
 except FileNotFoundError as e:
     raise HTTPException(status_code=500, detail=f"Model loading failed: {e}")
 
-
+# Root endpoint
 @app.get("/")
 def root():
     """Project overview endpoint."""
@@ -36,12 +37,12 @@ def root():
         "github": github_link
     }
 
-
+# Health check endpoint
 @app.get("/health/")
 def health():
     return {"status": "API is healthy and ready."}
 
-
+# Predict rain in 7 days
 @app.get("/predict/rain/")
 def predict_rain(date: str = Query(..., description="Date in YYYY-MM-DD format")):
     try:
@@ -65,7 +66,7 @@ def predict_rain(date: str = Query(..., description="Date in YYYY-MM-DD format")
         }
     })
 
-
+# Predict precipitation fall in next 3 days
 @app.get("/predict/precipitation/fall/")
 def predict_precipitation(date: str = Query(..., description="Date in YYYY-MM-DD format")):
     try:

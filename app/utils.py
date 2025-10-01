@@ -3,9 +3,10 @@ import requests
 import pandas as pd
 import numpy as np
 
-
+# Fetch weather data from Open-Meteo API
 def fetch_weather_features(date: pd.Timestamp):
     if date <= pd.Timestamp.now() - pd.Timedelta(days=3):
+        # Use historical data endpoint for past days
         url = (
         f"https://archive-api.open-meteo.com/v1/archive?"
         f"latitude=-33.8678&longitude=151.2073"
@@ -20,6 +21,7 @@ def fetch_weather_features(date: pd.Timestamp):
         )
 
     else:
+        # Use forecast endpoint for recent and future dates
         url = (
             f"https://api.open-meteo.com/v1/forecast?"
             f"latitude=-33.8678&longitude=151.2073"
@@ -41,11 +43,11 @@ def fetch_weather_features(date: pd.Timestamp):
     return data["daily"]
 
 
-
+# Cyclic encoding for periodic features
 def _encode_cyclic(val, max_val):
     return np.sin(2 * np.pi * val / max_val), np.cos(2 * np.pi * val / max_val)
 
-
+# Feature engineering for rain prediction
 def engineer_rain_features(weather_data, date: pd.Timestamp):
     get = lambda key, default=0: weather_data.get(key, [default])[0]
 
@@ -73,7 +75,7 @@ def engineer_rain_features(weather_data, date: pd.Timestamp):
         "dayofweek_cos": dow_cos
     }])
 
-
+# Feature engineering for precipitation prediction
 def engineer_precip_features(weather_data, date: pd.Timestamp):
     get = lambda key, default=0: weather_data.get(key, [default])[0]
 
